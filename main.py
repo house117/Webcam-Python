@@ -116,14 +116,11 @@ class MainFrame(GridLayout):
         currentColor=[t for t in ToggleButton.get_widgets('color') if t.state=='down'][0]
         currentFormat=[f for f in ToggleButton.get_widgets('format') if f.state=='down'][0]
         currentSize=[s for s in ToggleButton.get_widgets('size') if s.state=='down'][0]
-
+        imageFinalName = ''
         print(currentColor.text)
         ret,foto = self.capture.read()
-        if currentColor.text == 'A color':
-            print('Pidio a color el prro')
-        elif currentColor.text == 'B/N':
+        if currentColor.text == 'B/N':
             foto = cv2.cvtColor(foto, cv2.COLOR_RGB2GRAY)
-            print('Pidio B/N el prro')
         elif currentColor.text == 'Binarizada':
             foto = cv2.cvtColor(foto, cv2.COLOR_RGB2GRAY)
             #NORMAL thresholding (global)
@@ -134,42 +131,14 @@ class MainFrame(GridLayout):
             #Adaptive Gaussian Thresholding
             foto = cv2.adaptiveThreshold(foto,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
             cv2.THRESH_BINARY, 11, 2)
-
         #Format to save.
         if currentFormat.text == 'PNG':
-            print('Pidio PNG el prro')
             compression_params = [cv2.IMWRITE_PNG_COMPRESSION, 9] 
             cv2.imwrite(timestr+'.png', foto, compression_params)
-            if currentSize.text == '800x600':
-                    print('Entro 360')
-                    width = 800
-                    height = 600
-                    im = imaag.open(timestr+'.png')
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('800600'+timestr+'.png')
-            elif currentSize.text == '640x360':
-                print('Entro 360')
-                width = 640
-                height = 360
-                im = imaag.open(timestr+'.gif')
-                im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                im2.save('640360'+timestr+'.gif')
+            imageFinalName = timestr+'.png'
         elif currentFormat.text == 'JPG':
             cv2.imwrite(timestr+'.jpg', foto, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-            if currentSize.text == '800x600':
-                    print('Entro 360')
-                    width = 800
-                    height = 600
-                    im = imaag.open(timestr+'.jpg')
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('800600'+timestr+'.jpg')
-            elif currentSize.text == '640x360':
-                print('Entro 360')
-                width = 640
-                height = 360
-                im = imaag.open(timestr+'.gif')
-                im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                im2.save('640360'+timestr+'.gif')
+            imageFinalName = timestr+'.jpg'
         elif currentFormat.text == 'GIF':
             compression_params = [cv2.IMWRITE_PNG_COMPRESSION, 9] 
             cv2.imwrite(timestr+'.png', foto, compression_params)
@@ -177,20 +146,7 @@ class MainFrame(GridLayout):
             im = im.convert('RGB').convert('P', palette=imaag.ADAPTIVE)
             os.remove(timestr+".png")
             im.save(timestr+'.gif')
-            if currentSize.text == '800x600':
-                    print('Entro 360')
-                    width = 800
-                    height = 600
-                    im = imaag.open(timestr+'.gif')
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('800600'+timestr+'.gif')
-            elif currentSize.text == '640x360':
-                print('Entro 360')
-                width = 640
-                height = 360
-                im = imaag.open(timestr+'.gif')
-                im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                im2.save('640360'+timestr+'.gif')
+            imageFinalName = timestr+'.gif'
         elif currentFormat.text == 'BMP':
             print('La pidio BMP el prro')
             compression_params = [cv2.IMWRITE_PNG_COMPRESSION, 9] 
@@ -201,39 +157,29 @@ class MainFrame(GridLayout):
                 # prevent IOError: cannot write mode RGBA as BMP
                 r, g, b, a = img.split()
                 img = imaag.merge("RGB", (r, g, b))
-                if currentSize.text == '800x600':
-                    print('Entro 360')
-                    width = 800
-                    height = 600
-                    im = imaag.open(file_out)
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('800600'+file_out)
-                elif currentSize.text == '640x360':
-                    print('Entro 360')
-                    width = 640
-                    height = 360
-                    im = imaag.open(file_out)
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('640360'+file_out)
+                img.save(file_out)
+                imageFinalName = file_out
             else:
                 img.save(file_out)
-                if currentSize.text == '800x600':
-                    width = 800
-                    height = 600
-                    im = imaag.open(file_out)
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('800600'+file_out)
-                elif currentSize.text == '640x360':
-                    print('Entro 360')
-                    width = 640
-                    height = 360
-                    im = imaag.open(file_out)
-                    im2 = im.resize((width, height), imaag.ANTIALIAS) 
-                    im2.save('640360'+file_out)
-            os.remove(timestr+".png")
+                imageFinalName = file_out
+                os.remove(timestr+".png")
         else:
             cv2.imwrite(timestr+'.png', foto)
         #Resize if necesary
+        if currentSize.text == '800x600':
+            print('Entro 360')
+            width = 800
+            height = 600
+            im = imaag.open(imageFinalName)
+            im2 = im.resize((width, height), imaag.ANTIALIAS) 
+            im2.save('800600'+imageFinalName)
+        elif currentSize.text == '640x360':
+            print('Entro 360')
+            width = 640
+            height = 360
+            im = imaag.open(imageFinalName)
+            im2 = im.resize((width, height), imaag.ANTIALIAS) 
+            im2.save('640360'+imageFinalName)
     
 class CamApp(App):
     def build(self):

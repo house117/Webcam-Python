@@ -124,18 +124,34 @@ class MainFrame(GridLayout):
         elif currentColor.text == 'Binarizada':
             foto = cv2.cvtColor(foto, cv2.COLOR_RGB2GRAY)
             #NORMAL thresholding (global)
-            ret,foto = cv2.threshold(foto,127,255,cv2.THRESH_BINARY)
+            #ret,foto = cv2.threshold(foto,127,255,cv2.THRESH_BINARY)
             #Adaptive MEAN Thresholding
             #foto = cv2.adaptiveThreshold(foto,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
             #cv2.THRESH_BINARY,11,2)
             #Adaptive Gaussian Thresholding
-            #foto = cv2.adaptiveThreshold(foto,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
-            #cv2.THRESH_BINARY, 11, 2)
+            foto = cv2.adaptiveThreshold(foto,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+            cv2.THRESH_BINARY, 11, 2)
         #Format to save.
         if currentFormat.text == 'PNG':
+            
             compression_params = [cv2.IMWRITE_PNG_COMPRESSION, 9] 
             cv2.imwrite(timestr+'.png', foto, compression_params)
             imageFinalName = timestr+'.png'
+            im = imaag.open(timestr+".png")
+            
+            width, height  = im.size
+            for x in range(width):
+                for y in range(height):
+                    r, g, b = im.getpixel((x,y))
+                    if(r > g and r>b ):
+                        r1, g1, b1 = 255, 0, 0
+                    if(g > r and g > b ):
+                        r1, g1, b1 = 0, 255, 0
+                    if(b > r and b > g ):
+                        r1, g1, b1 = 0, 0, 255
+                    newpixel = r1, g1, b1
+                    im.putpixel((x,y),newpixel) 
+            im.save('colorC.png')
         elif currentFormat.text == 'JPG':
             cv2.imwrite(timestr+'.jpg', foto, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
             imageFinalName = timestr+'.jpg'
@@ -175,41 +191,12 @@ class MainFrame(GridLayout):
             im2.save('800600'+imageFinalName)
         elif currentSize.text == '640x360':
             print('Entro 360')
-            width = 32
-            height = 32
+            width = 30
+            height = 30
             im = imaag.open(imageFinalName)
             im2 = im.resize((width, height), imaag.ANTIALIAS) 
             im2.save('640360'+imageFinalName)
-            im3 = imaag.open('640360'+imageFinalName)
-            F=[-1, -1, 0, 1, 1, 1, 0, -1];
-            C=[0, 1, 1, 1, 0, -1, -1, -1];
-            width, height  = im3.size
-            sumatoria = 0
-            for x in range(1, width, 3):
-                for y in range(1, height, 3):
-                    #if(((x+1)%3) == 0 and ((y+1)%3) == 0):
-                    print ('('+str(x)+', '+str(y)+')')
-                    r0 = im3.getpixel((x,y))
-                    sumatoria+=r0
-                    print('Valores dentro del subfor, vuelta en 8')
-                    for i in range(0, 8):
-                        m = x+F[i]
-                        n = y+C[i]
-                        print ('('+str(m)+', '+str(n)+')')
-                        if ((((m >= 0) and (m <= width)) and ((n >= 0) and (n <= height))) and ((n != width) and (m != height))):
-                            r = im3.getpixel((m,n))
-                            sumatoria+=r
-                    sumatoria/=9
-                    im3.putpixel((x, y), int(sumatoria))
-                    for i in range(0, 8):                            
-                        m = x+F[i]
-                        n = y+C[i]
-                        if ((((m >= 0) and (m <= width)) and ((n >= 0) and (n <= height))) and ((n != width) and (m != height))):
-                            r = im3.getpixel((m,n))
-                            im3.putpixel((m, n), int(sumatoria))
-                
-            im3.save('EJERCICIO'+imageFinalName)
-                    
+    
 class CamApp(App):
     def build(self):
         frame = MainFrame()
